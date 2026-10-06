@@ -1,3 +1,4 @@
+import nodemailer, { type Transporter } from "nodemailer";
 import { formatLei } from "../money";
 import { site } from "../site";
 import type { Order } from "./types";
@@ -21,22 +22,40 @@ ${forShop ? `<p>Email client: ${esc(c.email)}</p>` : `<p>Întrebări? Scrie-ne l
 </div>`;
 }
 
-async function send(to: string, subject: string, html: string, replyTo?: string) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return;
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: process.env.ORDER_EMAIL_FROM ?? `${site.name} <comenzi@magiacasei.ro>`,
-      to,
-      subject,
-      html,
-      reply_to: replyTo,
-    }),
-    signal: AbortSignal.timeout(8000),
+let transport: Transporter | null | undefined;
+
+// SMTP generic: funcționează cu Newsman (sau orice alt furnizor SMTP).
+function getTransport(): Transporter | null {
+  if (transport !== undefined) return transport;
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.warn("[comenzi] SMTP neconfigurat — emailurile de confirmare nu se trimit");
+    return (transport = null);
+  }
+  const port = Number(SMTP_PORT ?? 587);
+  transport = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port,
+    secure: port === 465,
+    requireTLS: port !== 465 && process.env.SMTP_HOST !== "localhost",
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
   });
-  if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
+  return transport;
+}
+
+async function send(to: string, subject: string, html: string, replyTo?: string) {
+  const t = getTransport();
+  if (!t) return;
+  await t.sendMail({
+    from: process.env.ORDER_EMAIL_FROM ?? `${site.name} <comenzi@magiacasei.ro>`,
+    to,
+    subject,
+    html,
+    replyTo,
+  });
 }
 
 /** Emailurile nu trebuie să blocheze sau să anuleze comanda: comanda e deja salvată. */
