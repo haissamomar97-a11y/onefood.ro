@@ -47,7 +47,7 @@ export function CartView() {
             </li>
           ))}
         </ul>
-        <aside className="h-fit rounded-3xl bg-white p-5 ring-1 ring-black/5 md:sticky md:top-28">
+        <aside className="h-fit rounded-3xl bg-white p-5 ring-1 ring-black/5 md:sticky md:top-32">
           <OrderSummary totals={totals} />
           <Link href="/comanda" className="btn-primary mt-4 hidden w-full md:flex">Finalizează comanda</Link>
           <Link href="/categorie/brazi" className="mt-3 block text-center text-sm underline">Continuă cumpărăturile</Link>

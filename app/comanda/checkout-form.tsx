@@ -173,7 +173,7 @@ export function CheckoutForm({ cardEnabled }: { cardEnabled: boolean }) {
           </fieldset>
         </div>
 
-        <aside className="h-fit space-y-4 rounded-3xl bg-white p-5 ring-1 ring-black/5 md:sticky md:top-28">
+        <aside className="h-fit space-y-4 rounded-3xl bg-white p-5 ring-1 ring-black/5 md:sticky md:top-32">
           <h2 className="font-display text-lg font-semibold">Comanda ta</h2>
           <ul className="space-y-2 text-sm">
             {totals.lines.map((l) => (

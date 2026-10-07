@@ -8,7 +8,7 @@ export function Footer() {
     <footer className="mt-16 bg-pine-800 text-sm text-white/80">
       <div className="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Logo light />
+          <Logo className="h-14 w-auto" />
           <p className="mt-3">{site.tagline}.</p>
           <p className="mt-3"><a className="text-gold-300 underline" href={`mailto:${site.email}`}>{site.email}</a></p>
         </div>

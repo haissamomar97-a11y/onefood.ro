@@ -24,7 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: p.name,
     description: desc.slice(0, 160),
     alternates: { canonical: `/produs/${p.slug}` },
-    openGraph: { title: p.name, description: p.short, images: [p.image], url: `/produs/${p.slug}` },
+    // Facebook/WhatsApp nu afișează SVG: până la pozele reale folosim imaginea de brand
+    openGraph: { title: p.name, description: p.short, images: [p.image.endsWith(".svg") ? "/brand/og.png" : p.image], url: `/produs/${p.slug}` },
   };
 }
 
@@ -44,7 +45,7 @@ export default async function ProductPage({ params }: Props) {
       </nav>
 
       <div className="mt-2 grid gap-6 md:grid-cols-2 md:gap-12">
-        <div className="relative -mx-4 aspect-[4/3] overflow-hidden bg-gold-100 sm:mx-0 sm:aspect-square sm:rounded-3xl md:sticky md:top-28 md:self-start">
+        <div className="relative -mx-4 aspect-[4/3] overflow-hidden bg-gold-100 sm:mx-0 sm:aspect-square sm:rounded-3xl md:sticky md:top-32 md:self-start">
           <ProductImage src={p.image} alt={p.name} priority sizes="(min-width: 768px) 50vw, 100vw" />
         </div>
         <div>

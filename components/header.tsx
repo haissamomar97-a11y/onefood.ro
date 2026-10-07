@@ -19,8 +19,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-black/5 bg-cream/90 backdrop-blur-md">
       <div className="bg-pine-700 px-4 py-1.5 text-center text-xs font-medium text-gold-100 sm:text-sm">{promo}</div>
-      <div className="container-page flex h-14 items-center justify-between gap-4 sm:h-16">
-        <Logo />
+      <div className="container-page flex h-16 items-center justify-between gap-4 md:h-20">
+        <Logo className="h-12 w-auto md:h-16" />
         <nav aria-label="Categorii" className="hidden items-center gap-1 md:flex">
           <Link href="/produse" className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-pine-50">Toate produsele</Link>
           {categories.map((c) => (
