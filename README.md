@@ -9,8 +9,31 @@ singura rută dinamică este `POST /api/comenzi`.
 npm install
 npm run dev          # http://localhost:3000 (comenzile se salvează în .data/orders.json)
 npm run check        # verificare tipuri + teste unitare + build
-npm run test:e2e     # test complet al procesului de comandă (telefon + desktop), după build
+npm run test:e2e     # test complet (telefon + desktop), inclusiv plata cu cardul pe un NETOPIA simulat; după build
 ```
+
+## Produse
+
+Produsele vin din Excel (`data/brazi.xlsx`, **nu se urcă în repo** — conține date interne):
+
+```bash
+pip install openpyxl
+python3 scripts/import-produse.py data/brazi.xlsx > lib/catalog.generated.ts
+python3 scripts/placeholders.py   # imagini provizorii pentru produsele fără poză
+```
+
+Modelele noi (prefix SKU nou) se adaugă în `MODELS` din `scripts/import-produse.py`, cu numele și descrierea în română.
+
+## Plăți NETOPIA
+
+Plata cu cardul se face pe pagina găzduită de NETOPIA (3-D Secure inclus; nu atingem datele cardului).
+Confirmarea vine prin notificare (IPN) la `/api/plata/netopia`, verificată criptografic (JWT RS512, cheia publică NETOPIA).
+Un card refuzat nu anulează comanda — clientul poate reîncerca. Emailurile pleacă o singură dată, după plată.
+Variabile: `NETOPIA_API_KEY`, `NETOPIA_POS_SIGNATURE`, `NETOPIA_PUBLIC_KEY`, `NETOPIA_SANDBOX` (1 = teste).
+
+## Administrare
+
+`/admin` — comenzi, status, AWB Sameday, export CSV. Parola: `ADMIN_PASSWORD` (minim 12 caractere).
 
 ## Cum funcționează comenzile
 

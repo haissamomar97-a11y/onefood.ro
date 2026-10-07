@@ -9,3 +9,7 @@ next-env.d.ts
 test-results/
 playwright-report/
 .vercel
+
+# date interne (prețuri de achiziție etc.) — nu se urcă în repo-ul public
+data/*.xlsx
+data/*.csv

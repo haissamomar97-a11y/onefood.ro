@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { QtyStepper } from "@/components/add-to-cart";
 import { useCart } from "@/components/cart-provider";
 import { OrderSummary } from "@/components/order-summary";
 import { ProductImage } from "@/components/product-image";
+import { QtyStepper } from "@/components/qty-stepper";
 import { formatLei } from "@/lib/money";
 import { MAX_QTY_PER_LINE, priceCart } from "@/lib/pricing";
 
@@ -17,45 +17,46 @@ export function CartView() {
   if (totals.lines.length === 0) {
     return (
       <div className="container-page py-16 text-center">
-        <h1 className="text-2xl font-bold">Coșul tău este gol</h1>
-        <p className="mt-2 text-muted">Descoperă produsele noastre pentru casă.</p>
-        <Link href="/produse" className="btn-primary mt-6">Vezi produsele</Link>
+        <p className="text-5xl" aria-hidden>🎄</p>
+        <h1 className="mt-4 font-display text-2xl font-bold">Coșul tău este gol</h1>
+        <p className="mt-2 text-muted">Hai să găsim bradul potrivit pentru casa ta.</p>
+        <Link href="/categorie/brazi" className="btn-primary mt-6">Vezi brazii</Link>
       </div>
     );
   }
 
   return (
-    <div className="container-page py-8 pb-32 md:pb-8">
-      <h1 className="text-3xl font-bold">Coșul tău</h1>
-      <div className="mt-6 grid gap-8 md:grid-cols-[1fr_320px]">
-        <ul className="divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white">
-          {totals.lines.map(({ product: p, qty, lineTotalBani }) => (
-            <li key={p.slug} className="flex gap-3 p-3 sm:gap-4 sm:p-4" data-testid="cart-line">
-              <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-brand-50 sm:size-24">
+    <div className="container-page py-6 sm:py-8">
+      <h1 className="font-display text-3xl font-bold">Coșul tău</h1>
+      <div className="mt-5 grid gap-6 md:grid-cols-[1fr_340px] md:gap-8">
+        <ul className="space-y-3">
+          {totals.lines.map(({ sku, product: p, variant: v, qty, lineTotalBani }) => (
+            <li key={sku} className="flex gap-3 rounded-3xl bg-white p-3 ring-1 ring-black/5 sm:gap-4 sm:p-4" data-testid="cart-line">
+              <Link href={`/produs/${p.slug}`} className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-gold-100">
                 <ProductImage src={p.image} alt="" sizes="96px" />
-              </div>
-              <div className="flex flex-1 flex-col gap-2">
-                <Link href={`/produs/${p.slug}`} className="font-semibold hover:underline">{p.name}</Link>
-                <span className="text-sm text-muted">{formatLei(p.priceBani)} / buc.</span>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <QtyStepper value={qty} max={Math.min(MAX_QTY_PER_LINE, p.stock)} onChange={(n) => setQty(p.slug, n)} label={`Cantitate ${p.name}`} />
+              </Link>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <Link href={`/produs/${p.slug}`} className="line-clamp-2 leading-snug font-semibold">{p.name}</Link>
+                {p.variants.length > 1 && <span className="text-sm text-muted">{v.label}</span>}
+                <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                  <QtyStepper small value={qty} max={Math.min(MAX_QTY_PER_LINE, v.stock)} onChange={(n) => setQty(sku, n)} label={`Cantitate ${p.name}`} />
                   <span className="font-bold">{formatLei(lineTotalBani)}</span>
                 </div>
-                <button type="button" className="self-start text-sm text-muted underline" onClick={() => remove(p.slug)}>Elimină</button>
               </div>
+              <button type="button" className="-mt-1 -mr-1 self-start rounded-xl p-2 text-muted hover:bg-black/5" onClick={() => remove(sku)} aria-label={`Elimină ${p.name}`}>✕</button>
             </li>
           ))}
         </ul>
-        <aside className="h-fit rounded-2xl border border-stone-200 bg-white p-4">
+        <aside className="h-fit rounded-3xl bg-white p-5 ring-1 ring-black/5 md:sticky md:top-28">
           <OrderSummary totals={totals} />
           <Link href="/comanda" className="btn-primary mt-4 hidden w-full md:flex">Finalizează comanda</Link>
-          <Link href="/produse" className="mt-3 block text-center text-sm underline">Continuă cumpărăturile</Link>
+          <Link href="/categorie/brazi" className="mt-3 block text-center text-sm underline">Continuă cumpărăturile</Link>
         </aside>
       </div>
-      {/* buton fix pe mobil, mereu la îndemâna degetului */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white p-3 md:hidden">
-        <Link href="/comanda" className="btn-primary w-full">Finalizează comanda · {formatLei(totals.totalBani)}</Link>
+      <div className="fixed inset-x-0 bottom-16 z-30 p-3 md:hidden">
+        <Link href="/comanda" className="btn-primary w-full shadow-lg">Finalizează comanda · {formatLei(totals.totalBani)}</Link>
       </div>
+      <div aria-hidden className="h-16 md:hidden" />
     </div>
   );
 }

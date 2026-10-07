@@ -1,21 +1,23 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import { formatLei } from "../money";
 import { site } from "../site";
-import type { Order } from "./types";
+import type { Order, OrderStore } from "./types";
+
+const payLabel = (o: Order) => (o.paymentMethod === "card" ? `card NETOPIA (${o.payment.state === "paid" ? "PLĂTIT" : o.payment.state})` : "ramburs");
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 export function orderEmailHtml(order: Order, forShop: boolean): string {
   const c = order.customer;
   const rows = order.lines
-    .map((l) => `<tr><td>${esc(l.name)} × ${l.qty}</td><td align="right">${formatLei(l.lineTotalBani)}</td></tr>`)
+    .map((l) => `<tr><td>${esc(l.name)}${l.variant ? ` (${esc(l.variant)})` : ""} × ${l.qty}</td><td align="right">${formatLei(l.lineTotalBani)}</td></tr>`)
     .join("");
   return `<div style="font-family:Arial,sans-serif;max-width:560px">
 <h2>${forShop ? "Comandă nouă" : "Mulțumim pentru comandă!"} — ${order.id}</h2>
-${forShop ? "" : `<p>Bună, ${esc(c.name)}! Am primit comanda ta și te contactăm telefonic pentru confirmare. Livrare estimată: ${site.shipping.deliveryDays}.</p>`}
+${forShop ? `<p><b>Plată:</b> ${payLabel(order)}</p>` : `<p>Bună, ${esc(c.name)}! Am primit comanda ta. ${order.paymentMethod === "card" ? "Plata cu cardul a fost confirmată." : "Plătești la livrare, cash sau card."} Livrare estimată cu ${site.shipping.carrier}: ${site.shipping.deliveryDays}.</p>`}
 <table width="100%" cellpadding="6" style="border-collapse:collapse">${rows}
 <tr><td>Livrare</td><td align="right">${order.shippingBani ? formatLei(order.shippingBani) : "Gratuită"}</td></tr>
-<tr><td><b>Total (plata la livrare)</b></td><td align="right"><b>${formatLei(order.totalBani)}</b></td></tr></table>
+<tr><td><b>Total${order.paymentMethod === "card" ? " (plătit cu cardul)" : " (plata la livrare)"}</b></td><td align="right"><b>${formatLei(order.totalBani)}</b></td></tr></table>
 <p><b>Livrare:</b> ${esc(c.name)}, ${esc(c.phone)}<br>${esc(c.address)}, ${esc(c.city)}, jud. ${esc(c.county)} ${esc(c.postalCode)}</p>
 ${c.notes ? `<p><b>Observații:</b> ${esc(c.notes)}</p>` : ""}
 ${forShop ? `<p>Email client: ${esc(c.email)}</p>` : `<p>Întrebări? Scrie-ne la ${site.email}.</p>`}
@@ -59,7 +61,13 @@ async function send(to: string, subject: string, html: string, replyTo?: string)
 }
 
 /** Emailurile nu trebuie să blocheze sau să anuleze comanda: comanda e deja salvată. */
-export async function sendOrderEmails(order: Order): Promise<void> {
+export async function sendOrderEmails(order: Order, store?: OrderStore): Promise<void> {
+  // trimitem o singură dată, chiar dacă NETOPIA retrimite notificarea
+  if (store) {
+    let first = false;
+    await store.update(order.id, (o) => (o.emailsSent ? null : ((first = true), { ...o, emailsSent: true })));
+    if (!first) return;
+  }
   const results = await Promise.allSettled([
     send(order.customer.email, `Comanda ${order.id} a fost primită`, orderEmailHtml(order, false), site.email),
     send(process.env.ORDER_NOTIFY_TO ?? site.email, `Comandă nouă ${order.id} — ${formatLei(order.totalBani)}`, orderEmailHtml(order, true), order.customer.email),

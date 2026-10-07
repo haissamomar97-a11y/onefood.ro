@@ -2,10 +2,10 @@
 export const site = {
   name: "Magia Casei",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://magiacasei.ro").replace(/\/$/, ""),
-  tagline: "Lucruri frumoase și practice pentru casa ta",
+  tagline: "Magia Crăciunului, livrată acasă",
   description:
-    "Magazin online cu articole pentru casă: bucătărie, decorațiuni, organizare și textile. Livrare rapidă în toată România, plata la livrare, retur în 14 zile.",
-  email: "contact@magiacasei.ro",
+    "Brazi de Crăciun artificiali, ghirlande și globuri. Livrare rapidă cu Sameday în toată România, plata cu cardul sau ramburs, retur în 14 zile.",
+  email: "office@magiacasei.ro",
   phone: "07XX XXX XXX", // DE COMPLETAT
   company: {
     legalName: "DE COMPLETAT S.R.L.", // DE COMPLETAT
@@ -14,8 +14,11 @@ export const site = {
     address: "DE COMPLETAT, România", // DE COMPLETAT
   },
   shipping: {
+    carrier: "Sameday",
     costBani: 1999,
-    freeFromBani: 25000,
-    deliveryDays: "1–3 zile lucrătoare",
+    freeFromBani: 30000,
+    deliveryDays: "1–2 zile lucrătoare",
+    /** Ultima zi de comandă pentru livrare înainte de Crăciun. */
+    christmasCutoff: "2026-12-19",
   },
 } as const;

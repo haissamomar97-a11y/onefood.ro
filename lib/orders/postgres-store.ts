@@ -23,6 +23,7 @@ export class PostgresOrderStore implements OrderStore {
         total_bani INTEGER NOT NULL,
         data JSONB NOT NULL
       )`
+      .then(() => this.sql`CREATE INDEX IF NOT EXISTS orders_created_at ON orders (created_at DESC)`)
       .then(() => undefined)
       .catch((e) => {
         this.ready = null;
@@ -36,7 +37,7 @@ export class PostgresOrderStore implements OrderStore {
     const inserted = await this.sql<Row[]>`
       INSERT INTO orders (id, idempotency_key, created_at, status, email, phone, total_bani, data)
       VALUES (${order.id}, ${order.idempotencyKey}, ${order.createdAt}, ${order.status},
-              ${order.customer.email}, ${order.customer.phone}, ${order.totalBani}, ${this.sql.json(order)})
+              ${order.customer.email}, ${order.customer.phone}, ${order.totalBani}, ${this.sql.json(order as never)})
       ON CONFLICT (idempotency_key) DO NOTHING
       RETURNING data`;
     if (inserted.length) return { order, created: true };
@@ -44,9 +45,27 @@ export class PostgresOrderStore implements OrderStore {
     return { order: row.data, created: false };
   }
 
+  async update(id: string, fn: (o: Order) => Order | null) {
+    await this.init();
+    return this.sql.begin(async (tx) => {
+      const [row] = await tx<Row[]>`SELECT data FROM orders WHERE id = ${id} FOR UPDATE`;
+      if (!row) return null;
+      const next = fn(row.data);
+      if (!next) return row.data;
+      await tx`UPDATE orders SET status = ${next.status}, data = ${tx.json(next as never)} WHERE id = ${id}`;
+      return next;
+    }) as Promise<Order | null>;
+  }
+
   async get(id: string) {
     await this.init();
     const [row] = await this.sql<Row[]>`SELECT data FROM orders WHERE id = ${id}`;
     return row?.data ?? null;
+  }
+
+  async list(limit = 200) {
+    await this.init();
+    const rows = await this.sql<Row[]>`SELECT data FROM orders ORDER BY created_at DESC LIMIT ${limit}`;
+    return rows.map((r) => r.data);
   }
 }

@@ -1,17 +1,10 @@
 import { formatLei } from "@/lib/money";
 
-export function Price({ bani, compareAt, large }: { bani: number; compareAt?: number; large?: boolean }) {
+export function Price({ bani, from, large }: { bani: number; from?: boolean; large?: boolean }) {
   return (
-    <span className="flex flex-wrap items-baseline gap-2">
-      <span className={`font-bold text-brand-700 ${large ? "text-3xl" : "text-lg"}`}>{formatLei(bani)}</span>
-      {compareAt && compareAt > bani && (
-        <>
-          <s className="text-sm text-muted" aria-label={`Preț vechi ${formatLei(compareAt)}`}>{formatLei(compareAt)}</s>
-          <span className="rounded-md bg-brand-100 px-1.5 py-0.5 text-xs font-semibold text-brand-700">
-            -{Math.round((1 - bani / compareAt) * 100)}%
-          </span>
-        </>
-      )}
+    <span className={`font-bold text-pine-700 ${large ? "text-3xl" : "text-base sm:text-lg"}`}>
+      {from && <span className="mr-1 text-xs font-medium text-muted sm:text-sm">de la</span>}
+      {formatLei(bani)}
     </span>
   );
 }

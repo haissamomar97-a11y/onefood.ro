@@ -1,40 +1,82 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #fbf6f1;
-  --color-brand-100: #f4e8dc;
-  --color-brand-200: #e8cfb6;
-  --color-brand-500: #b5643c;
-  --color-brand-600: #9a4f2b;
-  --color-brand-700: #7c3e22;
-  --color-ink: #2b2420;
-  --color-muted: #6b5f57;
-  --color-sage: #6f8a6a;
+  --color-pine-50: #eef5f1;
+  --color-pine-100: #d5e7dd;
+  --color-pine-600: #17553f;
+  --color-pine-700: #0f3d2e;
+  --color-pine-800: #0b2e22;
+  --color-pine-900: #071f17;
+  --color-gold-100: #f6edd3;
+  --color-gold-300: #e3c97f;
+  --color-gold-500: #c8a24a;
+  --color-gold-600: #a8832f;
+  --color-berry-500: #c0322b;
+  --color-berry-600: #a3241e;
+  --color-cream: #fbf8f1;
+  --color-ink: #1d2421;
+  --color-muted: #5f6b65;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-html { -webkit-text-size-adjust: 100%; }
-body { background: #fffdfb; color: var(--color-ink); }
-:focus-visible { outline: 3px solid var(--color-brand-500); outline-offset: 2px; }
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+body { background: var(--color-cream); color: var(--color-ink); overscroll-behavior-y: none; }
+:focus-visible { outline: 3px solid var(--color-gold-500); outline-offset: 2px; }
+h1, h2, h3 { text-wrap: balance; }
 
 @utility btn {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold transition duration-200 select-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
 }
 @utility btn-primary {
-  @apply btn bg-brand-600 text-white hover:bg-brand-700 active:scale-[0.99];
+  @apply btn bg-berry-500 text-white shadow-sm shadow-berry-600/30 hover:bg-berry-600;
+}
+@utility btn-dark {
+  @apply btn bg-pine-700 text-white hover:bg-pine-800;
 }
 @utility btn-outline {
-  @apply btn border border-brand-200 bg-white text-ink hover:border-brand-500;
+  @apply btn border border-pine-100 bg-white text-ink hover:border-pine-600;
 }
 @utility container-page {
   @apply mx-auto w-full max-w-6xl px-4;
 }
 @utility field {
-  @apply mt-1 block min-h-12 w-full rounded-xl border border-stone-300 bg-white px-3 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none;
+  @apply mt-1 block min-h-12 w-full rounded-2xl border border-stone-300 bg-white px-4 text-base focus:border-pine-600 focus:ring-2 focus:ring-pine-100 focus:outline-none;
+}
+@utility font-display {
+  font-family: var(--font-display);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
 @layer components {
-  .prose-legal h2 { @apply mt-8 mb-2 text-xl font-semibold; }
+  .prose-legal h2 { @apply mt-8 mb-2 font-display text-xl font-semibold; }
   .prose-legal p, .prose-legal li { @apply mb-3 leading-relaxed text-muted; }
   .prose-legal ul { @apply list-disc pl-5; }
+}
+
+/* zăpadă discretă în hero */
+@keyframes snow { from { transform: translateY(-10%); } to { transform: translateY(110%); } }
+.snow::before, .snow::after {
+  content: ""; position: absolute; inset: -100% 0 0; pointer-events: none;
+  background-image: radial-gradient(2px 2px at 20% 30%, #fff9 50%, transparent 51%), radial-gradient(3px 3px at 70% 10%, #fff8 50%, transparent 51%),
+    radial-gradient(2px 2px at 40% 70%, #fff7 50%, transparent 51%), radial-gradient(2px 2px at 85% 55%, #fff9 50%, transparent 51%),
+    radial-gradient(3px 3px at 10% 85%, #fff6 50%, transparent 51%);
+  background-size: 240px 240px; animation: snow 18s linear infinite;
+}
+.snow::after { background-size: 320px 320px; animation-duration: 26s; opacity: 0.7; }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.animate-pop { animation: pop 0.35s var(--ease-spring); }
+@keyframes toast-in { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+.animate-toast { animation: toast-in 0.25s var(--ease-spring); }
+
+@media (prefers-reduced-motion: reduce) {
+  .snow::before, .snow::after, .animate-pop, .animate-toast { animation: none; }
+  html { scroll-behavior: auto; }
 }

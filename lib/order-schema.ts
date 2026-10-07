@@ -23,15 +23,19 @@ export const customerSchema = z.object({
   notes: z.string().trim().max(500, "Maxim 500 de caractere").optional().default(""),
 });
 
+export const PAYMENT_METHODS = ["card", "ramburs"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
 export const orderRequestSchema = z.object({
   idempotencyKey: z.string().uuid(),
   customer: customerSchema,
   items: z
-    .array(z.object({ slug: z.string().max(120), qty: z.number().int().min(1).max(MAX_QTY_PER_LINE) }))
+    .array(z.object({ sku: z.string().max(160), qty: z.number().int().min(1).max(MAX_QTY_PER_LINE) }))
     .min(1, "Coșul este gol")
     .max(50),
-  paymentMethod: z.literal("ramburs"),
+  paymentMethod: z.enum(PAYMENT_METHODS, { message: "Alege metoda de plată" }),
   acceptTerms: z.literal(true, { message: "Trebuie să accepți termenii și condițiile" }),
+  newsletter: z.boolean().optional().default(false),
   // capcană pentru boți: câmpul e ascuns și trebuie să rămână gol
   website: z.string().max(0).optional().default(""),
 });

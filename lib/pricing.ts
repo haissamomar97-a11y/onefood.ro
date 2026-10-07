@@ -1,10 +1,10 @@
-import { getProduct, type Product } from "./products";
+import { resolveSku, type Product, type Variant } from "./products";
 import { site } from "./site";
 
 export const MAX_QTY_PER_LINE = 10;
 
-export type CartItem = { slug: string; qty: number };
-export type PricedLine = { product: Product; qty: number; lineTotalBani: number };
+export type CartItem = { sku: string; qty: number };
+export type PricedLine = { sku: string; product: Product; variant: Variant; qty: number; lineTotalBani: number };
 export type Totals = { lines: PricedLine[]; subtotalBani: number; shippingBani: number; totalBani: number };
 
 export function shippingFor(subtotalBani: number): number {
@@ -16,11 +16,12 @@ export function shippingFor(subtotalBani: number): number {
 export function priceCart(items: CartItem[]): Totals {
   const lines: PricedLine[] = [];
   for (const item of items) {
-    const product = getProduct(item.slug);
-    if (!product) continue;
-    const qty = Math.max(0, Math.min(Math.floor(item.qty), MAX_QTY_PER_LINE, product.stock));
+    const found = resolveSku(item.sku);
+    if (!found) continue;
+    const { product, variant } = found;
+    const qty = Math.max(0, Math.min(Math.floor(item.qty), MAX_QTY_PER_LINE, variant.stock));
     if (qty === 0) continue;
-    lines.push({ product, qty, lineTotalBani: product.priceBani * qty });
+    lines.push({ sku: item.sku, product, variant, qty, lineTotalBani: variant.priceBani * qty });
   }
   const subtotalBani = lines.reduce((s, l) => s + l.lineTotalBani, 0);
   const shippingBani = shippingFor(subtotalBani);

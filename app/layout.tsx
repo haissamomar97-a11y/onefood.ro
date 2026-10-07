@@ -1,23 +1,26 @@
 import type { Metadata, Viewport } from "next";
+import { BottomNav, BottomNavSpacer } from "@/components/bottom-nav";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { CartToast } from "@/components/toast";
 import { JsonLd } from "@/lib/jsonld";
 import { site } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: `${site.name} — ${site.tagline}`, template: `%s | ${site.name}` },
+  title: { default: `Brazi de Crăciun artificiali | ${site.name}`, template: `%s | ${site.name}` },
   description: site.description,
   applicationName: site.name,
   alternates: { canonical: "/" },
   openGraph: { type: "website", locale: "ro_RO", siteName: site.name, url: site.url },
   robots: { index: true, follow: true },
   formatDetection: { telephone: false },
+  appleWebApp: { capable: true, title: site.name, statusBarStyle: "default" },
 };
 
-export const viewport: Viewport = { themeColor: "#9a4f2b", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#0f3d2e", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -30,6 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main id="continut" className="flex-1">{children}</main>
           <Footer />
+          <BottomNavSpacer />
+          <BottomNav />
+          <CartToast />
         </CartProvider>
         <JsonLd
           data={{

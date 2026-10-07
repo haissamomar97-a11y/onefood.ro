@@ -1,35 +1,40 @@
 import Link from "next/link";
 import { categories } from "@/lib/products";
 import { site } from "@/lib/site";
-import { CartLink } from "./cart-link";
+import { CartBadge } from "./cart-badge";
+import { IconBag, IconSearch } from "./icons";
+import { Logo } from "./logo";
+
+function daysUntil(iso: string) {
+  return Math.ceil((new Date(`${iso}T23:59:59+02:00`).getTime() - Date.now()) / 86_400_000);
+}
 
 export function Header() {
+  const cutoff = site.shipping.christmasCutoff;
+  const d = daysUntil(cutoff);
+  const promo =
+    d > 0 && d <= 60
+      ? `🎄 Comandă până pe ${new Date(cutoff).toLocaleDateString("ro-RO", { day: "numeric", month: "long" })} pentru livrare înainte de Crăciun`
+      : `🚚 Livrare gratuită cu ${site.shipping.carrier} la comenzi peste ${site.shipping.freeFromBani / 100} lei`;
   return (
-    <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur">
-      <div className="bg-sage px-4 py-1.5 text-center text-xs font-medium text-white sm:text-sm">
-        Livrare gratuită la comenzi peste 250 lei · Plata la livrare · Retur 14 zile
-      </div>
-      <div className="container-page flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="text-xl font-bold tracking-tight text-brand-700" aria-label={`${site.name} — pagina principală`}>
-          ✦ {site.name}
-        </Link>
-        <nav aria-label="Categorii" className="hidden gap-1 md:flex">
+    <header className="sticky top-0 z-30 border-b border-black/5 bg-cream/90 backdrop-blur-md">
+      <div className="bg-pine-700 px-4 py-1.5 text-center text-xs font-medium text-gold-100 sm:text-sm">{promo}</div>
+      <div className="container-page flex h-14 items-center justify-between gap-4 sm:h-16">
+        <Logo />
+        <nav aria-label="Categorii" className="hidden items-center gap-1 md:flex">
+          <Link href="/produse" className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-pine-50">Toate produsele</Link>
           {categories.map((c) => (
-            <Link key={c.slug} href={`/categorie/${c.slug}`} className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-brand-50">
-              {c.name}
-            </Link>
+            <Link key={c.slug} href={`/categorie/${c.slug}`} className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-pine-50">{c.short}</Link>
           ))}
+          <Link href="/contact" className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-pine-50">Contact</Link>
         </nav>
-        <CartLink />
-      </div>
-      <nav aria-label="Categorii (mobil)" className="flex gap-2 overflow-x-auto px-4 pb-3 md:hidden">
-        <Link href="/produse" className="shrink-0 rounded-full border border-stone-200 px-4 py-2 text-sm font-medium">Toate</Link>
-        {categories.map((c) => (
-          <Link key={c.slug} href={`/categorie/${c.slug}`} className="shrink-0 rounded-full border border-stone-200 px-4 py-2 text-sm font-medium">
-            {c.name}
+        <div className="flex items-center gap-1">
+          <Link href="/cautare" aria-label="Caută" className="grid size-11 place-items-center rounded-xl hover:bg-pine-50"><IconSearch /></Link>
+          <Link href="/cos" aria-label="Coșul de cumpărături" className="relative hidden size-11 place-items-center rounded-xl hover:bg-pine-50 md:grid">
+            <span className="relative"><IconBag /><CartBadge /></span>
           </Link>
-        ))}
-      </nav>
+        </div>
+      </div>
     </header>
   );
 }
